@@ -1,0 +1,121 @@
+:root {
+    --clr-primary: #ff9933; /* Saffron */
+    --clr-secondary: #138808; /* Green */
+    --clr-bg-dark: #2c3e50;
+    --clr-bg-light: #f4f4f4;
+    --clr-surface-dark: #34495e;
+    --clr-surface-light: #ffffff;
+    --clr-text-dark: #333;
+    --clr-text-light: #fff;
+    --shadow-glow: 0 0 12px rgba(255,153,51,0.3);
+}
+
+[data-theme="dark"] {
+    --bg: var(--clr-bg-dark);
+    --surface: var(--clr-surface-dark);
+    --text: var(--clr-text-light);
+    --text-muted: #bdc3c7;
+}
+
+[data-theme="light"] {
+    --bg: var(--clr-bg-light);
+    --surface: var(--clr-surface-light);
+    --text: var(--clr-text-dark);
+    --text-muted: #7f8c8d;
+}
+
+body {
+    font-family: "Devanagari", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+nav {
+    background: rgba(44,62,80,0.8);
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 10;
+}
+
+nav a, nav span {
+    margin: 0 1rem;
+    color: var(--clr-primary);
+    font-family: "Orbitron", sans-serif;
+}
+
+.theme-toggle {
+    cursor: pointer;
+    background: var(--surface);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--clr-primary);
+}
+
+.container {
+    max-width: 800px;
+    margin: 5rem auto 2rem;
+    padding: 1rem;
+}
+
+.post-input, .comment-input, .login-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--clr-primary);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.btn {
+    background: linear-gradient(to right, var(--clr-primary), var(--clr-secondary));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.delete-btn {
+    background: linear-gradient(to right, #e74c3c, #c0392b);
+}
+
+.post {
+    background: var(--surface);
+    border: 1px solid var(--clr-primary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+}
+
+.post-image {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.comment {
+    background: rgba(255,153,51,0.1);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.section-title {
+    font-family: "Orbitron", sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--clr-primary);
+}
