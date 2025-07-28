@@ -3,45 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bharatiya</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <title>Divine Artifacts</title>
+    
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body data-theme="dark">
-    <nav>
-        <a href="#">Home</a>
-        <span id="user-greeting"></span>
-        <a id="logout-btn" style="display: none;">Logout</a>
-        <a id="login-btn">Login</a>
-        <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark</div>
-    </nav>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <div class="container">
-        <div id="login-section" style="display: block;">
-            <h2 class="section-title">Bharatiya Login</h2>
-            <input id="email" class="login-input" placeholder="Email" type="email">
-            <input id="password" class="login-input" placeholder="Password" type="password">
-            <button class="btn" onclick="login()">Login/Register</button>
-            <button class="btn" onclick="googleLogin()">Login with Google</button>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    aliased text-slate-700">
+
+    <!-- Main Container -->
+    <div id="app" class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-200">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">Divine Artifacts</h1>
+            <button id="cart-button" class="relative rounded-full p-2 hover:bg-slate-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </button>
+        </header>
+
+        <!-- Product Grid -->
+        <main id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+            <!-- Product cards will be injected here by JavaScript -->
+        </main>
+
+        <!-- Shopping Cart Sidebar -->
+        <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col">
+            <div class="p-6 flex justify-between items-center border-b">
+                <h2 class="text-2xl font-bold text-slate-800">Your Cart</h2>
+                <button id="close-cart-button" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="cart-items" class="flex-grow p-6 overflow-y-auto">
+                <p id="empty-cart-message" class="text-slate-500">Your cart is empty.</p>
+            </div>
+            <div class="p-6 border-t bg-slate-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-medium">Subtotal</span>
+                    <span id="cart-subtotal" class="text-xl font-bold text-slate-800">₹0.00</span>
+                </div>
+                <button id="checkout-button" class="w-full btn-primary font-bold py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    Proceed to Checkout
+                </button>
+            </div>
         </div>
 
-        <div id="post-section" style="display: none;">
-            <h2 class="section-title">Bharatiya</h2>
-            <textarea id="post-content" class="post-input" rows="3" placeholder="Share your thoughts..."></textarea>
-            <input id="post-image" type="file" accept="image/*">
-            <button class="btn" onclick="suggestQuote()">Suggest Sanskrit Quote</button>
-            <button class="btn" onclick="postContent()">Post</button>
+        <!-- Checkout Modal -->
+        <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 modal-backdrop">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg transform scale-95 modal-content">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center p-5 border-b rounded-t">
+                    <h3 class="text-xl font-semibold text-gray-900">Checkout</h3>
+                    <button id="close-modal-button" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div id="checkout-form-container" class="p-6">
+                    <form id="checkout-form">
+                        <div class="grid gap-4 mb-4 sm:grid-cols-2">
+                            <div>
+                                <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Full Name</label>
+                                <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Your Name" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
+                                <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="name@example.com" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="address" class="block mb-2 text-sm font-medium text-gray-900">Shipping Address</label>
+                            <textarea id="address" name="address" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Your full shipping address" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full btn-primary font-bold py-2.5 rounded-lg">
+                            Place Order & Get QR Code
+                        </button>
+                    </form>
+                </div>
 
-            <h2 class="section-title mt-8">Posts</h2>
-            <div id="posts-container"></div>
+                <!-- QR Code & Success Message -->
+                <div id="payment-container" class="p-6 text-center hidden">
+                    <div id="loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mx-auto mb-4"></div>
+                    <div id="payment-content" class="hidden">
+                        <h3 class="text-2xl font-bold text-green-600 mb-2">Order Placed Successfully!</h3>
+                        <p class="text-slate-600 mb-4">Scan the QR code below with your UPI app to complete the payment of <strong id="payment-amount"></strong>.</p>
+                        <img id="qr-code" src="" alt="QR Code for Payment" class="mx-auto rounded-lg shadow-md">
+                        <p class="mt-4 text-sm text-slate-500">Order details have been prepared for email.</p>
+                        <button id="send-email-btn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                            Send Order Email
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js"></script>
-    <script src="app.js" type="module"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- CONFIGURATION ---
+        const YOUR_UPI_ID = "9456811657@ibl";
+        const YOUR_NAME_FOR_UPI = "Divine Artifacts";
+        const RECIPIENT_EMAIL = "madhavprapanna@gmail.com";
+
+        // --- PRODUCT DATA ---
+        const products = [
+            { id: 1, name: 'Daily Pooja Kit', price: 500, image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center' },
+            { id: 2, name: 'Incense Sticks Pack', price: 150, image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop&crop=center' },
+            { id: 3, name: 'Prayer Mat', price: 300, image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop&crop=center' },
+            { id: 4, name: 'Brass Diya Lamp', price: 200, image: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=400&fit=crop&crop=center' },
+            { id: 5, name: 'Sandalwood Paste', price: 100, image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop&crop=center' },
+            { id: 6, name: 'Tulsi Mala Beads', price: 250, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center' },
+            { id: 7, name: 'Camphor Tablets', price: 80, image: 'https://images.unsplash.com/photo-1609501676725-7186f7c8f26c?w=400&h=400&fit=crop&crop=center' },
+            { id: 8, name: 'Aarti Book', price: 120, image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop&crop=center' },
+            { id: 9, name: 'Ganesha Statue', price: 899, image: 'https://images.unsplash.com/photo-1578593139939-67bb74c8509b?w=400&h=400&fit=crop&crop=center' },
+            { id: 10, name: 'Krishna Flute', price: 799, image: 'https://images.unsplash.com/photo-1578593139981-14abd7d7c7ab?w=400&h=400&fit=crop&crop=center' },
+            { id: 11, name: 'Sacred Thread', price: 99, image: 'https://images.unsplash.com/photo-1578593139939-67bb74c8509b?w=400&h=400&fit=crop&crop=center' },
+            { id: 12, name: 'Copper Water Pot', price: 1299, image: 'https://images.unsplash.com/photo-1578593139981-14abd7d7c7ab?w=400&h=400&fit=crop&crop=center' },
+        ];
+
+        // --- STATE ---
+        let cart = [];
+        let orderData = {};
+
+        // --- DOM ELEMENTS ---
+        const productGrid = document.getElementById('product-grid');
+        const cartButton = document.getElementById('cart-button');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const closeCartButton = document.getElementById('close-cart-button');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartCount = document.getElementById('cart-count');
+        const cartSubtotal = document.getElementById('cart-subtotal');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const checkoutButton = document.getElementById('checkout-button');
+        const checkoutModal = document.getElementById('checkout-modal');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const checkoutForm = document.getElementById('checkout-form');
+        const paymentContainer = document.getElementById('payment-container');
+        const checkoutFormContainer = document.getElementById('checkout-form-container');
+        const loader = document.getElementById('loader');
+        const paymentContent = document.getElementById('payment-content');
+        const paymentAmount = document.getElementById('payment-amount');
+        const qrCodeImg = document.getElementById('qr-code');
+        const sendEmailBtn = document.getElementById('send-email-btn');
+
+        // --- FUNCTIONS ---
+
+        function renderProducts() {
+            productGrid.innerHTML = '';
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden flex flex-col';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover" onerror="this.src='https://via.placeholder.com/400x400/e2e8f0/334155?text=${encodeURIComponent(product.name)}'">
+                    <div class="p-5 flex-grow flex flex-col">
+                        <h3 class="text-lg font-semibold text-slate-800">${product.name}</h3>
+                        <p class="text-xl font-bold text-indigo-600 mt-2">₹${product.price.toFixed(2)}</p>
+                        <div class="mt-auto pt-4">
+                            <button data-product-id="${product.id}" class="add-to-cart-btn mt-2 w-full btn-primary font-bold py-2 rounded-lg">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productGrid.appendChild(productCard);
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            updateCart();
+        }
+        
+        function changeQuantity(productId, quantity) {
+            const cartItem = cart.find(item => item.id === productId);
+            if (!cartItem) return;
+
+            if (quantity <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+            } else {
+                cartItem.quantity = quantity;
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            cartItemsContainer.innerHTML = '';
+            let subtotal = 0;
+            let totalItems = 0;
+
+            if (cart.length === 0) {
+                cartItemsContainer.appendChild(emptyCartMessage);
+                emptyCartMessage.style.display = 'block';
+            } else {
+                emptyCartMessage.style.display = 'none';
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    subtotal += itemTotal;
+                    totalItems += item.quantity;
+                    
+                    const cartItemEl = document.createElement('div');
+                    cartItemEl.className = 'flex justify-between items-center py-4 border-b last:border-b-0';
+                    cartItemEl.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md" onerror="this.src='https://via.placeholder.com/64x64/e2e8f0/334155?text=${encodeURIComponent(item.name.substr(0,2))}'">
+                            <div>
+                                <h4 class="font-semibold text-slate-800">${item.name}</h4>
+                                <p class="text-slate-500 text-sm">₹${item.price.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" min="1" value="${item.quantity}" data-product-id="${item.id}" class="quantity-input w-14 text-center border rounded-md p-1">
+                            <button data-product-id="${item.id}" class="remove-item-btn p-1 text-red-500 hover:text-red-700">&times;</button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItemEl);
+                });
+            }
+
+            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+            cartCount.textContent = totalItems;
+            checkoutButton.disabled = cart.length === 0;
+        }
+
+        function toggleCart() {
+            cartSidebar.classList.toggle('translate-x-full');
+        }
+        
+        function toggleModal() {
+            if (checkoutModal.classList.contains('hidden')) {
+                checkoutModal.classList.remove('hidden');
+                checkoutModal.classList.add('flex');
+                setTimeout(() => {
+                    checkoutModal.querySelector('.modal-backdrop').classList.remove('opacity-0');
+                    checkoutModal.querySelector('.modal-content').classList.remove('scale-95');
+                }, 10);
+            } else {
+                checkoutModal.querySelector('.modal-backdrop').classList.add('opacity-0');
+                checkoutModal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    checkoutModal.classList.add('hidden');
+                    checkoutModal.classList.remove('flex');
+                }, 300);
+            }
+        }
+        
+        function generateQRCode(amount, orderId) {
+            const upiUrl = `upi://pay?pa=${YOUR_UPI_ID}&pn=${encodeURIComponent(YOUR_NAME_FOR_UPI)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderId)}`;
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+            qrCodeImg.src = qrApiUrl;
+            paymentAmount.textContent = `₹${amount.toFixed(2)}`;
+        }
+
+        function sendOrderEmail() {
+            const subject = encodeURIComponent(`New Order ${orderData.orderId} - Divine Artifacts`);
+            const body = encodeURIComponent(`
+New Order Details:
+
+Order ID: ${orderData.orderId}
+Customer Name: ${orderData.customerName}
+Customer Email: ${orderData.customerEmail}
+Shipping Address: ${orderData.customerAddress}
+
+Items Ordered:
+${orderData.cartItemsText}
+
+Total Amount: ${orderData.totalAmount}
+Payment Method: UPI (${YOUR_UPI_ID})
+
+Please process this order for shipping.
+
+Best regards,
+Divine Artifacts Store
+            `);
+            
+            const mailtoLink = `mailto:${RECIPIENT_EMAIL}?subject=${subject}&body=${body}`;
+            window.location.href = mailtoLink;
+        }
+
+        async function handleCheckout(e) {
+            e.preventDefault();
+            
+            checkoutFormContainer.classList.add('hidden');
+            paymentContainer.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            paymentContent.classList.add('hidden');
+
+            const formData = new FormData(e.target);
+            const customerName = formData.get('name');
+            const customerEmail = formData.get('email');
+            const customerAddress = formData.get('address');
+            
+            const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const orderId = `ORDER-${Date.now()}`;
+            
+            const cartItemsText = cart.map(item => `${item.name} (x${item.quantity}) - ₹${(item.price * item.quantity).toFixed(2)}`).join('\n');
+            
+            orderData = {
+                orderId,
+                customerName,
+                customerEmail,
+                customerAddress,
+                cartItemsText,
+                totalAmount: `₹${totalAmount.toFixed(2)}`
+            };
+
+            generateQRCode(totalAmount, orderId);
+            
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                paymentContent.classList.remove('hidden');
+            }, 1500); 
+
+            cart = [];
+            updateCart();
+        }
+
+        // --- EVENT LISTENERS ---
+        productGrid.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const productId = parseInt(button.dataset.productId, 10);
+
+            if (button.classList.contains('add-to-cart-btn')) {
+                addToCart(productId);
+                if (cartSidebar.classList.contains('translate-x-full')) {
+                    toggleCart();
+                    setTimeout(toggleCart, 1500);
+                }
+            }
+        });
+
+        cartItemsContainer.addEventListener('change', (e) => {
+            if (e.target.classList.contains('quantity-input')) {
+                const productId = parseInt(e.target.dataset.productId, 10);
+                const quantity = parseInt(e.target.value, 10);
+                changeQuantity(productId, quantity);
+            }
+        });
+
+        cartItemsContainer.addEventListener('click', (e) => {
+             if (e.target.closest('.remove-item-btn')) {
+                const productId = parseInt(e.target.closest('.remove-item-btn').dataset.productId, 10);
+                changeQuantity(productId, 0);
+            }
+        });
+
+        cartButton.addEventListener('click', toggleCart);
+        closeCartButton.addEventListener('click', toggleCart);
+        
+        checkoutButton.addEventListener('click', () => {
+            toggleCart();
+            toggleModal();
+        });
+        
+        closeModalButton.addEventListener('click', toggleModal);
+        checkoutModal.addEventListener('click', (e) => {
+            if (e.target.id === 'checkout-modal') {
+                toggleModal();
+            }
+        });
+        
+        checkoutForm.addEventListener('submit', handleCheckout);
+        sendEmailBtn.addEventListener('click', sendOrderEmail);
+
+        // --- INITIALIZATION ---
+        renderProducts();
+        updateCart();
+    });
+    </script>
 </body>
 </html>
