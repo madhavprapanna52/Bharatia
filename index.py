@@ -3,19 +3,21 @@ import psycopg2
 from PIL import Image
 import os
 import uuid
+import io
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # Replace with a secure key in production
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key')  # Use env var for production
 
-# ----- PostgreSQL Config -----
-DB_NAME = "social_media"
-DB_USER = "madhav"
-DB_PASSWORD = "1234"
-DB_HOST = "localhost"
-DB_PORT = "5432"
+# ----- PostgreSQL Config (Use Environment Variables for Portability) -----
+DB_NAME = os.environ.get('DB_NAME', 'social_media')
+DB_USER = os.environ.get('DB_USER', 'madhav')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '1234')
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_PORT = os.environ.get('DB_PORT', '5432')
 
 # ----- Uploads Config -----
-UPLOAD_FOLDER = 'uploads'
+# For Vercel, use /tmp for temporary storage (non-persistent)
+UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp/uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -80,475 +82,229 @@ def pixelate_image(input_path, output_path, pixel_size=16):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ----- HTML UI -----
+# ----- HTML UI (Minimal and Awesome: Simplified Tailwind, Indian-inspired colors, Clean Design) -----
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Social</title>
+    <title>Bharatiya</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Space+Grotesk:wght@300;400;500;700&display=stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Devanagari:wght@400;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --clr-primary: #00d4ff;
-            --clr-secondary: #ff6b35;
-            --clr-bg-dark: #0a0a0a;
-            --clr-bg-light: #f5f5f7;
-            --clr-surface-dark: #1a1a1a;
+            --clr-primary: #ff9933; /* Saffron */
+            --clr-secondary: #138808; /* Green */
+            --clr-bg-dark: #2c3e50;
+            --clr-bg-light: #f4f4f4;
+            --clr-surface-dark: #34495e;
             --clr-surface-light: #ffffff;
-            --clr-text-dark: #111;
+            --clr-text-dark: #333;
             --clr-text-light: #fff;
-            --shadow-glow: 0 0 16px rgba(0,212,255,.25);
+            --shadow-glow: 0 0 12px rgba(255,153,51,0.3);
         }
 
         [data-theme="dark"] {
             --bg: var(--clr-bg-dark);
             --surface: var(--clr-surface-dark);
             --text: var(--clr-text-light);
-            --text-muted: #a8a8a8;
+            --text-muted: #bdc3c7;
         }
 
         [data-theme="light"] {
             --bg: var(--clr-bg-light);
             --surface: var(--clr-surface-light);
             --text: var(--clr-text-dark);
-            --text-muted: #666;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
+            --text-muted: #7f8c8d;
         }
 
         body {
-            font-family: "Space Grotesk", sans-serif;
+            font-family: "Devanagari", serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.5;
             min-height: 100vh;
         }
 
         nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            background: rgba(0,0,0,.7);
-            padding: 1rem 0;
+            background: rgba(44,62,80,0.8);
+            padding: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-bottom: 1px solid rgba(0,212,255,.2);
-            z-index: 1000;
-        }
-
-        nav a {
-            font-family: "Orbitron", monospace;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            margin: 0 1.5rem;
-            transition: color 0.2s;
-        }
-
-        nav a:hover {
-            color: var(--clr-primary);
-        }
-
-        .theme-toggle, .login-btn {
-            margin-left: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: "Orbitron", monospace;
-            font-size: 0.8rem;
-            background: var(--surface);
-            border: 1px solid var(--clr-primary);
-            border-radius: 20px;
-            padding: 0.4rem 0.8rem;
-            transition: transform 0.2s;
-        }
-
-        .theme-toggle:hover, .login-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .post-container, .posts-container {
-            max-width: 700px;
+            position: fixed;
             width: 100%;
-            margin: 0 auto;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav a, nav span {
+            margin: 0 1rem;
+            color: var(--clr-primary);
+            font-family: "Orbitron", sans-serif;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid var(--clr-primary);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 5rem auto 2rem;
             padding: 1rem;
         }
 
-        .post-input, .comment-input {
+        .post-input, .comment-input, .login-input {
             width: 100%;
-            padding: 0.8rem 1.2rem;
-            font-size: 1rem;
-            font-family: "Space Grotesk", sans-serif;
+            padding: 0.75rem;
             border: 1px solid var(--clr-primary);
-            border-radius: 12px;
+            border-radius: 0.5rem;
             background: var(--surface);
             color: var(--text);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            resize: none;
+            margin-bottom: 1rem;
         }
 
-        .post-input:focus, .comment-input:focus {
-            border-color: var(--clr-secondary);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .post-btn, .comment-btn, .delete-btn {
-            background: linear-gradient(45deg, var(--clr-primary), var(--clr-secondary));
-            color: var(--clr-text-light);
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 20px;
-            font-family: "Orbitron", monospace;
-            font-size: 0.9rem;
+        .btn {
+            background: linear-gradient(to right, var(--clr-primary), var(--clr-secondary));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
         .delete-btn {
-            background: linear-gradient(45deg, #ff4444, #ff6b35);
-        }
-
-        .post-btn:hover, .comment-btn:hover, .delete-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .post-btn:disabled, .comment-btn:disabled, .delete-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
         }
 
         .post {
             background: var(--surface);
-            border: 1px solid rgba(0,212,255,.2);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid var(--clr-primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
             margin-bottom: 1.5rem;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.2s;
-        }
-
-        .post.visible {
-            opacity: 1;
+            transition: transform 0.2s;
         }
 
         .post:hover {
-            transform: translateY(-4px);
-            border-color: var(--clr-primary);
-        }
-
-        .post-content {
-            font-size: 1rem;
-            color: var(--text);
-            margin-bottom: 1rem;
+            transform: translateY(-5px);
         }
 
         .post-image {
             max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .post-actions button {
-            font-family: "Orbitron", monospace;
-            transition: color 0.2s;
-        }
-
-        .post-actions button:hover {
-            color: var(--clr-primary);
+            border-radius: 0.5rem;
+            margin: 1rem 0;
         }
 
         .comment {
-            background: rgba(0,212,255,.05);
-            border: 1px solid rgba(0,212,255,.2);
-            border-radius: 8px;
-            padding: 0.8rem;
+            background: rgba(255,153,51,0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
             margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .comment.visible {
-            opacity: 1;
         }
 
         .section-title {
-            font-family: "Orbitron", monospace;
-            font-size: 1.8rem;
-            font-weight: 600;
+            font-family: "Orbitron", sans-serif;
+            font-size: 2rem;
             text-align: center;
-            margin-bottom: 2rem;
-            background: linear-gradient(45deg, var(--clr-primary), var(--clr-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 2rem auto;
-            padding: 1rem;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 0.8rem 1.2rem;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            font-family: "Space Grotesk", sans-serif;
-            border: 1px solid var(--clr-primary);
-            border-radius: 12px;
-            background: var(--surface);
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .login-input:focus {
-            border-color: var(--clr-secondary);
-            box-shadow: var(--shadow-glow);
-        }
-
-        @media (max-width: 768px) {
-            nav a {
-                margin: 0 0.8rem;
-                font-size: 0.8rem;
-            }
-
-            .post-container, .posts-container, .login-container {
-                max-width: 90%;
-            }
+            margin-bottom: 1.5rem;
+            color: var(--clr-primary);
         }
     </style>
 </head>
 <body data-theme="dark">
-    <!-- Navbar -->
-    <nav id="navbar">
-        <a href="#home">Home</a>
-        <a href="#about">About</a>
+    <nav>
+        <a href="/">Home</a>
         {% if 'username' in session %}
-            <span class="login-btn">Logged in as {{ session['username'] }}</span>
-            <a href="/logout" class="login-btn">Logout</a>
+            <span>नमस्ते, {{ session['username'] }}</span>
+            <a href="/logout">Logout</a>
         {% else %}
-            <a href="/login" class="login-btn">Login</a>
+            <a href="/login">Login</a>
         {% endif %}
-        <div id="themeToggle" class="theme-toggle">
-            <span class="theme-icon">+</span>
-            <span>DARK</span>
-        </div>
+        <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark</div>
     </nav>
 
-    <!-- Login Section -->
-    {% if 'username' not in session %}
-    <section id="login" class="login-container pt-24">
-        <h2 class="section-title">Login or Register</h2>
-        <div class="bg-[var(--surface)] rounded-lg shadow-lg p-6">
-            <input id="username" class="login-input" placeholder="Enter username">
-            <div class="flex justify-end">
-                <button id="login-button" class="post-btn">Login/Register</button>
-            </div>
-        </div>
-    </section>
-    {% else %}
-    <!-- Post Creation Section -->
-    <section id="home" class="post-container pt-24">
-        <h2 class="section-title">Mini Social</h2>
-        <div class="bg-[var(--surface)] rounded-lg shadow-lg p-6 mb-8">
-            <textarea id="post-content" class="post-input" rows="4" placeholder="What's on your mind?"></textarea>
-            <input id="post-image" type="file" accept="image/*" class="mt-3">
-            <div class="flex justify-end mt-3">
-                <button id="post-button" class="post-btn">Post</button>
-            </div>
-        </div>
-    </section>
+    <div class="container">
+        {% if 'username' not in session %}
+            <h2 class="section-title">Bharatiya Login</h2>
+            <input id="username" class="login-input" placeholder="Username">
+            <button class="btn" onclick="login()">Login/Register</button>
+        {% else %}
+            <h2 class="section-title">Bharatiya</h2>
+            <textarea id="post-content" class="post-input" rows="3" placeholder="Share your thoughts..."></textarea>
+            <input id="post-image" type="file" accept="image/*">
+            <button class="btn" onclick="postContent()">Post</button>
 
-    <!-- Posts Section -->
-    <section class="posts-container">
-        <h2 class="section-title">All Posts</h2>
-        {% for post in posts %}
-            <div class="post">
-                <p class="post-content">{{ post[1] }}</p>
-                {% if post[3] %}
-                    <img src="/uploads/{{ post[3] }}" class="post-image" alt="Post image">
-                {% endif %}
-                <div class="post-actions">
-                    <button onclick="toggleLike(this)">❤️ Like</button>
-                    {% if 'user_id' in session and session['user_id'] == post[2] %}
-                        <button class="delete-btn" onclick="deletePost('{{ post[0] }}')">🗑️ Delete</button>
+            <h2 class="section-title mt-8">Posts</h2>
+            {% for post in posts %}
+                <div class="post">
+                    <p>{{ post[1] }} - by {{ post[5] }}</p>
+                    {% if post[3] %}
+                        <img src="/uploads/{{ post[3] }}" class="post-image">
                     {% endif %}
-                </div>
-                <div class="comment-box mt-4">
-                    <div class="flex items-center space-x-2">
-                        <input id="comment-{{ post[0] }}" class="comment-input" placeholder="Write a comment...">
-                        <button class="comment-btn" onclick="submitComment('{{ post[0] }}')">Comment</button>
+                    <div>
+                        <button onclick="toggleLike(this)">❤️ Like</button>
+                        {% if 'user_id' in session and session['user_id'] == post[2] %}
+                            <button class="btn delete-btn" onclick="deletePost('{{ post[0] }}')">Delete</button>
+                        {% endif %}
                     </div>
-                </div>
-                <div class="comments mt-4">
+                    <input id="comment-{{ post[0] }}" class="comment-input" placeholder="Comment...">
+                    <button class="btn" onclick="submitComment('{{ post[0] }}')">Comment</button>
                     {% for comment in post[4] %}
-                        <div class="comment">
-                            <span class="text-[var(--clr-primary)]">💬</span>
-                            {{ comment }}
-                        </div>
+                        <div class="comment">{{ comment }}</div>
                     {% endfor %}
                 </div>
-            </div>
-        {% endfor %}
-    </section>
-    {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
 
     <script>
-        // Theme Toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        let dark = true;
-        themeToggle.onclick = () => {
-            dark = !dark;
-            body.setAttribute('data-theme', dark ? 'dark' : 'light');
-            themeToggle.querySelector('.theme-icon').textContent = dark ? '+' : '-';
-            themeToggle.querySelector('span:last-child').textContent = dark ? 'DARK' : 'LIGHT';
-            document.getElementById('navbar').style.background = dark
-                ? 'rgba(0,0,0,.7)'
-                : 'rgba(255,255,255,.8)';
-        };
-
-        // Navbar Scroll
-        const nav = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            nav.style.background = dark
-                ? (window.scrollY > 40 ? 'rgba(0,0,0,.8)' : 'rgba(0,0,0,.7)')
-                : (window.scrollY > 40 ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.8)');
-        });
-
-        // Intersection Observer for animations
-        const io = new IntersectionObserver(entries => {
-            entries.forEach(e => e.isIntersecting && e.target.classList.add('visible'));
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.post, .comment').forEach(el => io.observe(el));
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text || '';
-            return div.innerHTML;
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.querySelector('.theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
         }
 
-        // Handle login/register
-        document.getElementById('login-button')?.addEventListener('click', async () => {
-            const username = document.getElementById('username').value.trim();
-            if (!username) return alert('Please enter a username!');
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `username=${encodeURIComponent(username)}`
-                });
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Failed to login/register. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error logging in:', error);
-                alert('An error occurred. Please try again.');
-            }
-        });
+        async function login() {
+            const username = document.getElementById('username').value;
+            if (!username) return;
+            await fetch('/login', { method: 'POST', body: `username=${username}`, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+            location.reload();
+        }
 
-        // Handle post submission
-        document.getElementById('post-button')?.addEventListener('click', async () => {
-            const content = document.getElementById('post-content').value.trim();
-            const imageInput = document.getElementById('post-image');
-            if (!content) return alert('Please enter some content!');
+        async function postContent() {
+            const content = document.getElementById('post-content').value;
+            const image = document.getElementById('post-image').files[0];
+            if (!content) return;
             const formData = new FormData();
             formData.append('content', content);
-            if (imageInput.files.length > 0) {
-                formData.append('image', imageInput.files[0]);
-            }
-            try {
-                const response = await fetch('/post', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Failed to post. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error posting:', error);
-                alert('An error occurred. Please try again.');
-            }
-        });
+            if (image) formData.append('image', image);
+            await fetch('/post', { method: 'POST', body: formData });
+            location.reload();
+        }
 
-        // Handle comment submission
         async function submitComment(postId) {
-            const commentInput = document.getElementById(`comment-${postId}`);
-            const comment = commentInput.value.trim();
-            if (!comment) return alert('Please enter a comment!');
-            try {
-                const response = await fetch(`/comment/${postId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `comment=${encodeURIComponent(comment)}`
-                });
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Failed to comment. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error commenting:', error);
-                alert('An error occurred. Please try again.');
-            }
+            const comment = document.getElementById(`comment-${postId}`).value;
+            if (!comment) return;
+            await fetch(`/comment/${postId}`, { method: 'POST', body: `comment=${comment}`, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+            location.reload();
         }
 
-        // Handle post deletion
         async function deletePost(postId) {
-            if (!confirm('Are you sure you want to delete this post?')) return;
-            try {
-                const response = await fetch(`/delete/${postId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Failed to delete post. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error deleting post:', error);
-                alert('An error occurred. Please try again.');
-            }
+            if (!confirm('Delete?')) return;
+            await fetch(`/delete/${postId}`, { method: 'POST' });
+            location.reload();
         }
 
-        // Toggle like button (client-side only for demo)
-        function toggleLike(button) {
-            button.classList.toggle('text-[var(--clr-secondary)]');
+        function toggleLike(btn) {
+            btn.classList.toggle('text-red-500');
         }
     </script>
 </body>
@@ -566,7 +322,7 @@ def index():
     for post in posts:
         cur.execute("SELECT content FROM comments WHERE post_id = %s", (post[0],))
         comments = [row[0] for row in cur.fetchall()]
-        posts_with_comments.append((post[0], post[1], post[2], post[3], comments, post[4]))
+        posts_with_comments.append((post[0], post[1], post[2], post[3], comments, post[4]))  # Added username as post[5] but index is 4
     cur.close()
     conn.close()
     return render_template_string(HTML_TEMPLATE, posts=posts_with_comments)
@@ -613,7 +369,7 @@ def post():
             file.save(filepath)
             pixelate_image(filepath, pixelated_filepath)
             image_path = 'pixelated_' + filename
-            os.remove(filepath)  # Remove original image
+            os.remove(filepath)  # Remove original
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("INSERT INTO posts (content, user_id, image_path) VALUES (%s, %s, %s)", (content, session['user_id'], image_path))
@@ -645,7 +401,7 @@ def delete_post(post_id):
         cur.close()
         conn.close()
         return "Unauthorized", 403
-    if post[1]:  # Delete image file if exists
+    if post[1]:
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post[1]))
         except:
