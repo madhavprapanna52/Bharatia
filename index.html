@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharatiya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+    <nav>
+        <a href="#">Home</a>
+        <span id="user-greeting"></span>
+        <a id="logout-btn" style="display: none;">Logout</a>
+        <a id="login-btn">Login</a>
+        <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark</div>
+    </nav>
+
+    <div class="container">
+        <div id="login-section" style="display: block;">
+            <h2 class="section-title">Bharatiya Login</h2>
+            <input id="email" class="login-input" placeholder="Email" type="email">
+            <input id="password" class="login-input" placeholder="Password" type="password">
+            <button class="btn" onclick="login()">Login/Register</button>
+            <button class="btn" onclick="googleLogin()">Login with Google</button>
+        </div>
+
+        <div id="post-section" style="display: none;">
+            <h2 class="section-title">Bharatiya</h2>
+            <textarea id="post-content" class="post-input" rows="3" placeholder="Share your thoughts..."></textarea>
+            <input id="post-image" type="file" accept="image/*">
+            <button class="btn" onclick="suggestQuote()">Suggest Sanskrit Quote</button>
+            <button class="btn" onclick="postContent()">Post</button>
+
+            <h2 class="section-title mt-8">Posts</h2>
+            <div id="posts-container"></div>
+        </div>
+    </div>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>
