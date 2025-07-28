@@ -46,7 +46,9 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-    aliased text-slate-700">
+    </style>
+</head>
+<body class="antialiased text-slate-700">
 
     <!-- Main Container -->
     <div id="app" class="container mx-auto p-4 md:p-8">
@@ -334,7 +336,7 @@ Divine Artifacts Store
             window.location.href = mailtoLink;
         }
 
-        async function handleCheckout(e) {
+        function handleCheckout(e) {
             e.preventDefault();
             
             checkoutFormContainer.classList.add('hidden');
